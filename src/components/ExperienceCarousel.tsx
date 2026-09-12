@@ -37,17 +37,13 @@ export default function ExperienceCarousel({ experiences, education }: Experienc
   const carouselRef = useRef<HTMLDivElement>(null);
   const slidesRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Drag/touch state
+  // Drag/touch state for desktop mouse drag
   const isDraggingRef = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
   const startXRef = useRef(0);
-  const startYRef = useRef(0);
   const scrollLeftRef = useRef(0);
   const draggedDistanceRef = useRef(0);
   const closestIdxRef = useRef(0);
-
-  // Touch direction lock: null = undecided, "x" = horizontal, "y" = vertical
-  const touchAxisRef = useRef<"x" | "y" | null>(null);
 
   // Debounced scroll-end fallback timer
   const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -87,19 +83,25 @@ export default function ExperienceCarousel({ experiences, education }: Experienc
   ];
 
   // Calculate Spencer Gabor signature parabolic curve & rotation
+  // Optimized for zero layout-thrashing on mobile and silky 60/120fps scrolling
   const updateCurves = useCallback(() => {
     if (!carouselRef.current) return;
     const container = carouselRef.current;
-    const containerRect = container.getBoundingClientRect();
-    const containerCenter = containerRect.left + containerRect.width / 2;
+
+    // Hard-clamp internal vertical scroll so container NEVER moves in Y
+    if (container.scrollTop !== 0) {
+      container.scrollTop = 0;
+    }
+
+    const containerCenter = container.scrollLeft + container.clientWidth / 2;
+    const isMobile = container.clientWidth < 640;
 
     let closestIdx = 0;
     let minDistance = Infinity;
 
     slidesRef.current.forEach((slide, idx) => {
       if (!slide) return;
-      const slideRect = slide.getBoundingClientRect();
-      const slideCenter = slideRect.left + slideRect.width / 2;
+      const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
       const distFromCenter = slideCenter - containerCenter;
 
       if (Math.abs(distFromCenter) < minDistance) {
@@ -107,16 +109,18 @@ export default function ExperienceCarousel({ experiences, education }: Experienc
         closestIdx = idx;
       }
 
-      // Outward rotation (-5.5deg to +5.5deg)
-      const rotate = Math.max(-5.5, Math.min(5.5, distFromCenter * 0.015));
-
-      // Parabolic vertical dip: center is 0px, edges dip down smoothly
-      const dip = Math.min(42, Math.pow(distFromCenter / 300, 2) * 14);
-
-      // Subtle scale curve
-      const scale = Math.max(0.95, 1 - Math.abs(distFromCenter) / 3200);
-
-      slide.style.transform = `translate3d(0, ${dip}px, 0) rotate(${rotate}deg) scale(${scale})`;
+      if (isMobile) {
+        // Mobile: zero vertical dip and minimal tilt so content is stable, visible, and never overflows Y
+        const rotate = Math.max(-1.5, Math.min(1.5, distFromCenter * 0.005));
+        const scale = Math.max(0.96, 1 - Math.abs(distFromCenter) / 2600);
+        slide.style.transform = `translate3d(0, 0, 0) rotate(${rotate}deg) scale(${scale})`;
+      } else {
+        // Desktop: full signature Spencer Gabor parabolic vertical dip & rotation
+        const rotate = Math.max(-5.5, Math.min(5.5, distFromCenter * 0.015));
+        const dip = Math.min(42, Math.pow(distFromCenter / 300, 2) * 14);
+        const scale = Math.max(0.95, 1 - Math.abs(distFromCenter) / 3200);
+        slide.style.transform = `translate3d(0, ${dip}px, 0) rotate(${rotate}deg) scale(${scale})`;
+      }
       slide.style.transformOrigin = "50% 120%";
     });
 
@@ -169,6 +173,7 @@ export default function ExperienceCarousel({ experiences, education }: Experienc
 
   // ─── Mouse Drag handlers (desktop) ───
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
     if (!carouselRef.current) return;
     isDraggingRef.current = true;
     setIsDragging(true);
@@ -191,65 +196,9 @@ export default function ExperienceCarousel({ experiences, education }: Experienc
     isDraggingRef.current = false;
     setIsDragging(false);
     scrollToSlide(closestIdxRef.current);
-  };
-
-  // ─── Touch handlers (mobile & tablet) with direction locking ───
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!carouselRef.current) return;
-    isDraggingRef.current = true;
-    touchAxisRef.current = null; // Reset direction lock
-    startXRef.current = e.touches[0].clientX;
-    startYRef.current = e.touches[0].clientY;
-    scrollLeftRef.current = carouselRef.current.scrollLeft;
-    draggedDistanceRef.current = 0;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDraggingRef.current || !carouselRef.current) return;
-
-    const x = e.touches[0].clientX;
-    const y = e.touches[0].clientY;
-
-    // On first significant move, decide direction lock
-    if (touchAxisRef.current === null) {
-      const deltaX = Math.abs(x - startXRef.current);
-      const deltaY = Math.abs(y - startYRef.current);
-
-      // Need at least a few pixels of movement to decide
-      if (deltaX < 5 && deltaY < 5) return;
-
-      if (deltaY > deltaX) {
-        // Vertical swipe — release to browser for normal page scroll
-        touchAxisRef.current = "y";
-        isDraggingRef.current = false;
-        return;
-      }
-      // Horizontal swipe — lock to carousel
-      touchAxisRef.current = "x";
-      setIsDragging(true);
-    }
-
-    // If locked to vertical, do nothing (let page scroll)
-    if (touchAxisRef.current === "y") return;
-
-    // Horizontal carousel scroll
-    e.preventDefault(); // Prevent vertical page scroll while swiping carousel
-    const walk = (x - startXRef.current) * 1.2;
-    draggedDistanceRef.current += Math.abs(x - startXRef.current);
-    startXRef.current = x;
-    carouselRef.current.scrollLeft = carouselRef.current.scrollLeft - walk;
-  };
-
-  const handleTouchEnd = () => {
-    if (!isDraggingRef.current) return;
-    isDraggingRef.current = false;
-    setIsDragging(false);
-    touchAxisRef.current = null;
-    // Let CSS snap-mandatory handle the final snap position
-    // Then after a brief delay, update curves to ensure counter is correct
     setTimeout(() => {
-      updateCurves();
-    }, 350);
+      draggedDistanceRef.current = 0;
+    }, 50);
   };
 
   const scrollToSlide = (index: number) => {
@@ -257,12 +206,8 @@ export default function ExperienceCarousel({ experiences, education }: Experienc
     const container = carouselRef.current;
     if (!slide || !container) return;
 
-    const slideRect = slide.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
     const targetScrollLeft =
-      container.scrollLeft +
-      (slideRect.left - containerRect.left) -
-      (containerRect.width / 2 - slideRect.width / 2);
+      slide.offsetLeft - (container.clientWidth / 2 - slide.offsetWidth / 2);
 
     container.scrollTo({
       left: targetScrollLeft,
@@ -343,21 +288,19 @@ export default function ExperienceCarousel({ experiences, education }: Experienc
         </div>
       </div>
 
-      {/* Signature Curved Carousel — Mobile-optimized with touch + snap-mandatory */}
+      {/* Signature Curved Carousel — Native fluid horizontal scroll on mobile with touch-pan-y page scroll */}
       <div
         ref={carouselRef}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUpOrLeave}
         onMouseLeave={handleMouseUpOrLeave}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        className={`flex gap-6 sm:gap-12 overflow-x-auto no-scrollbar snap-x snap-mandatory pt-8 pb-12 sm:pt-10 sm:pb-16 cursor-grab ${
+        className={`flex gap-6 sm:gap-12 overflow-x-auto overflow-y-hidden overscroll-x-contain no-scrollbar snap-x snap-mandatory pt-6 pb-10 sm:pt-10 sm:pb-16 cursor-grab ${
           isDragging ? "cursor-grabbing select-none" : ""
-        } px-[8vw] sm:px-[22vw] lg:px-[30vw]`}
+        } px-[9vw] sm:px-[22vw] lg:px-[30vw]`}
         style={{
           WebkitOverflowScrolling: "touch",
+          touchAction: "pan-x pan-y",
         }}
       >
         {items.map((item, idx) => {
@@ -448,7 +391,11 @@ export default function ExperienceCarousel({ experiences, education }: Experienc
               {/* Spencer Gabor Signature Pill Button */}
               <button
                 type="button"
-                onClick={() => setSelectedItem(item)}
+                onClick={() => {
+                  if (draggedDistanceRef.current < 8) {
+                    setSelectedItem(item);
+                  }
+                }}
                 className="mt-3.5 sm:mt-4 inline-flex items-center gap-2 rounded-full bg-[#0a0a0c] text-white px-5 sm:px-6 py-2 sm:py-2.5 font-heading font-extrabold text-xs sm:text-sm uppercase tracking-wider shadow-md hover:bg-[#0055ff] hover:scale-105 active:scale-95 transition-all duration-300"
                 data-cursor="Open"
               >
