@@ -14,6 +14,10 @@ export const PORTFOLIO_PAGE_QUERY = defineQuery(`{
       asset,
       alt
     },
+    secondaryProfileImage {
+      asset,
+      alt
+    },
     stats[] {
       _key,
       value,
