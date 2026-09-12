@@ -50,32 +50,19 @@ function WorkCard({
     const el = cardRef.current;
     if (!el) return;
 
-    // Initial visibility check (for cards already in viewport on load)
-    const rect = el.getBoundingClientRect();
-    const vh = window.innerHeight || document.documentElement.clientHeight;
-    if (rect.top < vh - 20 && rect.bottom > 20) {
-      setIsInView(true);
-      return; // Already visible, no observer needed
-    }
-
-    // IntersectionObserver with generous rootMargin for early trigger on mobile.
-    // Uses "once" pattern — once visible, disconnect to prevent scroll-back flicker.
+    // IntersectionObserver tracks enter AND leave so the pop-in animation
+    // replays every time the user scrolls back to this section.
     let observer: IntersectionObserver | null = null;
     if (typeof IntersectionObserver !== "undefined") {
       observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setIsInView(true);
-              // Once popped in, stay visible — disconnect observer
-              if (observer) observer.disconnect();
-            }
+            setIsInView(entry.isIntersecting);
           });
         },
         {
           threshold: 0.05,
-          // Generous bottom margin so cards trigger earlier during upward scroll
-          // This compensates for iOS Safari delayed IO callbacks during momentum
+          // Generous margins so cards trigger early on mobile momentum scroll
           rootMargin: "60px 0px -20px 0px",
         }
       );
