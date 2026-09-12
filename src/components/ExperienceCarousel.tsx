@@ -41,9 +41,13 @@ export default function ExperienceCarousel({ experiences, education }: Experienc
   const isDraggingRef = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
   const startXRef = useRef(0);
+  const startYRef = useRef(0);
   const scrollLeftRef = useRef(0);
   const draggedDistanceRef = useRef(0);
   const closestIdxRef = useRef(0);
+
+  // Touch direction lock: null = undecided, "x" = horizontal, "y" = vertical
+  const touchAxisRef = useRef<"x" | "y" | null>(null);
 
   // Debounced scroll-end fallback timer
   const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -189,22 +193,50 @@ export default function ExperienceCarousel({ experiences, education }: Experienc
     scrollToSlide(closestIdxRef.current);
   };
 
-  // ─── Touch handlers (mobile & tablet) ───
+  // ─── Touch handlers (mobile & tablet) with direction locking ───
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!carouselRef.current) return;
     isDraggingRef.current = true;
-    setIsDragging(true);
+    touchAxisRef.current = null; // Reset direction lock
     startXRef.current = e.touches[0].clientX;
+    startYRef.current = e.touches[0].clientY;
     scrollLeftRef.current = carouselRef.current.scrollLeft;
     draggedDistanceRef.current = 0;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDraggingRef.current || !carouselRef.current) return;
+
     const x = e.touches[0].clientX;
+    const y = e.touches[0].clientY;
+
+    // On first significant move, decide direction lock
+    if (touchAxisRef.current === null) {
+      const deltaX = Math.abs(x - startXRef.current);
+      const deltaY = Math.abs(y - startYRef.current);
+
+      // Need at least a few pixels of movement to decide
+      if (deltaX < 5 && deltaY < 5) return;
+
+      if (deltaY > deltaX) {
+        // Vertical swipe — release to browser for normal page scroll
+        touchAxisRef.current = "y";
+        isDraggingRef.current = false;
+        return;
+      }
+      // Horizontal swipe — lock to carousel
+      touchAxisRef.current = "x";
+      setIsDragging(true);
+    }
+
+    // If locked to vertical, do nothing (let page scroll)
+    if (touchAxisRef.current === "y") return;
+
+    // Horizontal carousel scroll
+    e.preventDefault(); // Prevent vertical page scroll while swiping carousel
     const walk = (x - startXRef.current) * 1.2;
     draggedDistanceRef.current += Math.abs(x - startXRef.current);
-    startXRef.current = x; // Update for continuous tracking
+    startXRef.current = x;
     carouselRef.current.scrollLeft = carouselRef.current.scrollLeft - walk;
   };
 
@@ -212,6 +244,7 @@ export default function ExperienceCarousel({ experiences, education }: Experienc
     if (!isDraggingRef.current) return;
     isDraggingRef.current = false;
     setIsDragging(false);
+    touchAxisRef.current = null;
     // Let CSS snap-mandatory handle the final snap position
     // Then after a brief delay, update curves to ensure counter is correct
     setTimeout(() => {
