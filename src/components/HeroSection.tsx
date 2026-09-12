@@ -100,10 +100,14 @@ export default function HeroSection({ profile }: HeroProps) {
     toggleTheme({ x, y });
   };
 
-  const chips = (profile?.heroChips?.filter(Boolean) || ["Flutter", "Node.js", "TypeScript", "Agentic AI"]).slice(
-    0,
-    4
-  );
+  const chips = (
+    profile?.heroChips?.filter(Boolean) || [
+      "Flutter",
+      "Node.js",
+      "TypeScript",
+      "Agentic AI",
+    ]
+  ).slice(0, 4);
   const fullBio =
     profile?.bio ||
     "Engineering high-performance production applications across Flutter mobile, TypeScript/Node.js backends, and intelligent AI automation workflows.";
@@ -118,7 +122,10 @@ export default function HeroSection({ profile }: HeroProps) {
           <span className="h-1.5 w-1.5 rounded-full bg-[#0055ff] animate-pulse"></span>
           <span>Bangkok, Thailand</span>
         </div>
-        <div>{profile?.title || "Software Engineer"} {profile?.focus ? `// ${profile.focus}` : "// Full-Stack & Mobile"}</div>
+        <div>
+          {profile?.title || "Software Engineer"}{" "}
+          {profile?.focus ? `// ${profile.focus}` : "// Full-Stack & Mobile"}
+        </div>
       </div>
 
       {/* Center: DOMINANT OVERSIZED TYPOGRAPHIC HERO WITH ANIMATED CHARACTERS */}
@@ -157,7 +164,7 @@ export default function HeroSection({ profile }: HeroProps) {
 
         <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
           {profileImgUrl && (
-            <div className="flex items-center gap-3.5 sm:gap-4 shrink-0">
+            <div className="flex items-center gap-3.5 sm:gap-4 shrink-0 relative z-30">
               {/* Avatar 3D Coin with exact dimensions so refresh button stays snug on mobile */}
               <div className="relative w-16 h-16 sm:w-20 sm:h-20 shrink-0 [perspective:1000px]">
                 <button
@@ -165,27 +172,38 @@ export default function HeroSection({ profile }: HeroProps) {
                   data-cursor="Flip"
                   onClick={handleAvatarClick}
                   className="w-full h-full rounded-full cursor-pointer focus:outline-none transition-transform duration-300 hover:scale-105 active:scale-95 group"
-                  aria-label={isFlipped ? "Flip to primary profile picture" : "Flip to alternate profile picture and warm theme"}
+                  aria-label={
+                    isFlipped
+                      ? "Flip to primary profile picture"
+                      : "Flip to alternate profile picture and warm theme"
+                  }
                 >
-                  {/* 3D Flipping Coin Body with subtle lively pulse ring */}
+                  {/* 3D Flipping Coin Body with upside-down (rotateX) flip */}
                   <div
                     className="w-full h-full rounded-full relative transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-md group-hover:shadow-xl ring-2 ring-[#0055ff]/30 hover:ring-[#0055ff] transition-all"
                     style={{
                       transformStyle: "preserve-3d",
-                      transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+                      transform: isFlipped
+                        ? "rotateX(180deg) scale(1.08)"
+                        : "rotateX(0deg) scale(1)",
                     }}
                   >
-                    {/* Front Face: Primary Profile Pic (Warm #feb55c / Orange Tone) */}
+                    {/* Front Face: Primary Profile Pic */}
                     <div
                       className="absolute inset-0 w-full h-full rounded-full overflow-hidden border-2 border-slate-200 bg-white"
                       style={{
                         backfaceVisibility: "hidden",
                         WebkitBackfaceVisibility: "hidden",
+                        transform: "rotateX(0deg) translateZ(1px)",
                       }}
                     >
                       <Image
                         src={profileImgUrl}
-                        alt={profile?.profileImage?.alt || profile?.name || "Primary Profile Picture"}
+                        alt={
+                          profile?.profileImage?.alt ||
+                          profile?.name ||
+                          "Primary Profile Picture"
+                        }
                         fill
                         priority
                         className="object-cover"
@@ -193,18 +211,21 @@ export default function HeroSection({ profile }: HeroProps) {
                       <div className="absolute inset-0 rounded-full ring-1 ring-inset ring-[#feb55c]/60 pointer-events-none" />
                     </div>
 
-                    {/* Back Face: Secondary Profile Pic (Alternate View) */}
+                    {/* Back Face: Secondary Profile Pic (Alternate View, upright on rotateX) */}
                     <div
                       className="absolute inset-0 w-full h-full rounded-full overflow-hidden border-2 border-[#0a0a0c] bg-white"
                       style={{
                         backfaceVisibility: "hidden",
                         WebkitBackfaceVisibility: "hidden",
-                        transform: "rotateY(180deg)",
+                        transform: "rotateX(180deg) translateZ(1px)",
                       }}
                     >
                       <Image
                         src={secondaryImgUrl || profileImgUrl}
-                        alt={profile?.secondaryProfileImage?.alt || "Alternate Profile Picture"}
+                        alt={
+                          profile?.secondaryProfileImage?.alt ||
+                          "Alternate Profile Picture"
+                        }
                         fill
                         priority
                         className="object-cover"
@@ -222,7 +243,9 @@ export default function HeroSection({ profile }: HeroProps) {
                   title="Tap to flip & toggle theme"
                   className="absolute -bottom-1 -right-1 z-10 h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-[#0a0a0c] text-white text-[10px] sm:text-xs font-mono font-bold flex items-center justify-center shadow-md border-2 border-white transition-transform hover:scale-110 active:scale-90 cursor-pointer"
                 >
-                  <span className={`inline-block transition-transform duration-500 ${isFlipped ? "rotate-180 text-[#feb55c]" : "text-white"}`}>
+                  <span
+                    className={`inline-block transition-transform duration-500 ${isFlipped ? "rotate-180 text-[#feb55c]" : "text-white"}`}
+                  >
                     ↻
                   </span>
                 </button>
@@ -296,7 +319,9 @@ export default function HeroSection({ profile }: HeroProps) {
             className="text-slate-600 hover:text-[#0055ff] transition-colors flex items-center gap-1.5 group font-medium"
           >
             <span>Experience</span>
-            <span className="inline-block transition-transform duration-300 group-hover:translate-y-0.5">↓</span>
+            <span className="inline-block transition-transform duration-300 group-hover:translate-y-0.5">
+              ↓
+            </span>
           </a>
           <a
             href="#projects"
@@ -304,7 +329,9 @@ export default function HeroSection({ profile }: HeroProps) {
             className="text-[#0055ff] hover:text-[#0a0a0c] transition-colors flex items-center gap-1.5 group font-medium"
           >
             <span>Works</span>
-            <span className="inline-block transition-transform duration-300 group-hover:translate-y-0.5">↓</span>
+            <span className="inline-block transition-transform duration-300 group-hover:translate-y-0.5">
+              ↓
+            </span>
           </a>
         </div>
       </div>

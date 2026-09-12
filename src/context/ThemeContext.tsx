@@ -112,7 +112,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         {ripple && (
           <div
             ref={rippleOverlayRef}
-            className="fixed inset-0 pointer-events-none z-50 will-change-[clip-path]"
+            className="fixed inset-0 pointer-events-none z-20 will-change-[clip-path]"
             style={{
               backgroundColor: ripple.color,
               clipPath: `circle(0px at ${ripple.originX}px ${ripple.originY}px)`,
