@@ -144,7 +144,7 @@ export default function FooterContact({ profile, socialLinks }: FooterProps) {
       <div className="w-full select-none pt-6 sm:pt-8 border-t border-slate-200">
         <div
           data-cursor="Nice"
-          className="font-extrabold uppercase text-slate-100 hover:text-[#0a0a0c] tracking-[-0.05em] leading-[0.8] text-[12vw] transition-colors duration-700"
+          className="font-extrabold uppercase text-slate-100 hover:text-[#0a0a0c] tracking-[-0.05em] leading-[0.8] text-[12vw] transition-colors duration-700 footer-watermark"
         >
           {shortName}
         </div>

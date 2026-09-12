@@ -65,6 +65,19 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+@keyframes bounceSubtle {
+  0%, 100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(0deg);
+  }
+}
+
+.animate-bounce-subtle {
+  animation: bounceSubtle 2.8s ease-in-out infinite;
+}
+
 @keyframes eyeLook {
   0%, 100% {
     transform: translate(0, 0);
@@ -567,3 +580,96 @@ h1, h2, h3, h4, h5, h6 {
     scroll-behavior: smooth;
   }
 }
+
+/* ==========================================================================
+   WARM THEME PALETTE (#feb55c) OVERRIDES
+   Dynamically activated when user flips the hero profile avatar coin
+   ========================================================================== */
+
+[data-theme="warm"] {
+  --color-background: #feb55c;
+  --color-surface: #fef0db;
+  --color-border: rgba(10, 10, 12, 0.15);
+  --color-muted: #3a2e1d;
+}
+
+[data-theme="warm"] body,
+[data-theme="warm"] #top,
+[data-theme="warm"] main,
+[data-theme="warm"] section,
+[data-theme="warm"] footer {
+  background-color: #feb55c !important;
+  transition: background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.4s ease;
+}
+
+[data-theme="warm"] .hero-grid {
+  background-image: radial-gradient(rgba(10, 10, 12, 0.12) 1px, transparent 1px) !important;
+}
+
+/* Borders and dividers */
+[data-theme="warm"] .border-slate-200,
+[data-theme="warm"] .border-t,
+[data-theme="warm"] .border-b,
+[data-theme="warm"] .border-y {
+  border-color: rgba(10, 10, 12, 0.14) !important;
+}
+
+/* Skills Ticker gradient mask on warm background */
+[data-theme="warm"] .ticker-fade-left {
+  background: linear-gradient(to right, #feb55c, transparent) !important;
+}
+
+[data-theme="warm"] .ticker-fade-right {
+  background: linear-gradient(to left, #feb55c, transparent) !important;
+}
+
+/* Text adjustments on warm background for optimal contrast & readability */
+[data-theme="warm"] .text-slate-400 {
+  color: #4a3d2b !important;
+}
+
+[data-theme="warm"] .text-slate-500 {
+  color: #3b3020 !important;
+}
+
+[data-theme="warm"] .text-slate-600 {
+  color: #241c10 !important;
+}
+
+[data-theme="warm"] .text-slate-700 {
+  color: #1a140b !important;
+}
+
+[data-theme="warm"] .text-slate-800 {
+  color: #0a0a0c !important;
+}
+
+/* Experience Dossier Cubes pop as crisp white cards against warm orange */
+[data-theme="warm"] #experience .bg-\[\#f8fafc\] {
+  background-color: #ffffff !important;
+  border-color: rgba(10, 10, 12, 0.16) !important;
+  box-shadow: 0 12px 32px rgba(10, 10, 12, 0.08) !important;
+}
+
+/* Watermark signoff in footer */
+[data-theme="warm"] .footer-watermark {
+  color: rgba(10, 10, 12, 0.09) !important;
+}
+
+[data-theme="warm"] .footer-watermark:hover {
+  color: #0a0a0c !important;
+}
+
+/* Top Navbar glass and pills in warm theme */
+[data-theme="warm"] header {
+  transition: background-color 0.4s ease;
+}
+
+[data-theme="warm"] header .bg-white\/90 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(10, 10, 12, 0.16) !important;
+  color: #0a0a0c !important;
+}
+

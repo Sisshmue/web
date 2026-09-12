@@ -30,10 +30,10 @@ export default function SkillsTicker({ categories }: SkillsTickerProps) {
   return (
     <section
       aria-label="Technical skills"
-      className="relative border-y border-slate-200 bg-white py-3 sm:py-4 overflow-hidden"
+      className="relative border-y border-slate-200 bg-white py-3 sm:py-4 overflow-hidden skills-ticker-wrap"
     >
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-white to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-white to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-white to-transparent ticker-fade-left" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-white to-transparent ticker-fade-right" />
 
       <div className="skills-marquee flex w-max gap-3" style={{ transform: 'translate3d(0,0,0)', WebkitTransform: 'translate3d(0,0,0)' }}>
         {loop.map((name, idx) => (
