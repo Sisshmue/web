@@ -13,11 +13,11 @@ type HeroProps = {
     bio?: string | null;
     heroChips?: string[] | null;
     profileImage?: {
-      asset?: any;
+      asset?: unknown;
       alt?: string | null;
     } | null;
     secondaryProfileImage?: {
-      asset?: any;
+      asset?: unknown;
       alt?: string | null;
     } | null;
   } | null;
@@ -100,14 +100,6 @@ export default function HeroSection({ profile }: HeroProps) {
     toggleTheme({ x, y });
   };
 
-  const chips = (
-    profile?.heroChips?.filter(Boolean) || [
-      "Flutter",
-      "Node.js",
-      "TypeScript",
-      "Agentic AI",
-    ]
-  ).slice(0, 4);
   const fullBio =
     profile?.bio ||
     "Engineering high-performance production applications across Flutter mobile, TypeScript/Node.js backends, and intelligent AI automation workflows.";
@@ -205,6 +197,7 @@ export default function HeroSection({ profile }: HeroProps) {
                           "Primary Profile Picture"
                         }
                         fill
+                        sizes="(max-width: 640px) 64px, 80px"
                         priority
                         className="object-cover"
                       />
@@ -227,6 +220,7 @@ export default function HeroSection({ profile }: HeroProps) {
                           "Alternate Profile Picture"
                         }
                         fill
+                        sizes="(max-width: 640px) 64px, 80px"
                         priority
                         className="object-cover"
                       />
@@ -298,14 +292,6 @@ export default function HeroSection({ profile }: HeroProps) {
             <p className="max-w-xl text-sm sm:text-base text-slate-600 font-sans leading-relaxed">
               {thesis}
             </p>
-            <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] sm:text-[11px] text-slate-400 uppercase tracking-wider">
-              {chips.map((chip, i) => (
-                <span key={chip} className="inline-flex items-center gap-2">
-                  {i > 0 && <span>•</span>}
-                  <span>{chip}</span>
-                </span>
-              ))}
-            </div>
           </div>
         </div>
       </div>
