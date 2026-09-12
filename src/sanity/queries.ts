@@ -8,6 +8,8 @@ export const PORTFOLIO_PAGE_QUERY = defineQuery(`{
     focus,
     headline,
     bio,
+    location,
+    availability,
     profileImage {
       asset,
       alt

@@ -30,7 +30,7 @@ export default async function HomePage() {
       </main>
 
       {/* Footer as a Moment (Full Viewport Closing Statement) */}
-      <FooterContact socialLinks={profile?.socialLinks} />
+      <FooterContact profile={profile} />
     </div>
   );
 }
