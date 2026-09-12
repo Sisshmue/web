@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { urlFor } from "@/sanity/image";
+import { usePortfolioTheme } from "@/context/ThemeContext";
 
 type HeroProps = {
   profile: {
@@ -12,6 +13,10 @@ type HeroProps = {
     bio?: string | null;
     heroChips?: string[] | null;
     profileImage?: {
+      asset?: any;
+      alt?: string | null;
+    } | null;
+    secondaryProfileImage?: {
       asset?: any;
       alt?: string | null;
     } | null;
@@ -80,9 +85,21 @@ function AnimatedI() {
 }
 
 export default function HeroSection({ profile }: HeroProps) {
+  const { isFlipped, toggleTheme } = usePortfolioTheme();
   const profileImgUrl = profile?.profileImage?.asset
     ? urlFor(profile.profileImage).width(600).height(600).url()
     : null;
+  const secondaryImgUrl = profile?.secondaryProfileImage?.asset
+    ? urlFor(profile.secondaryProfileImage).width(600).height(600).url()
+    : null;
+
+  const handleAvatarClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    toggleTheme({ x, y });
+  };
+
   const chips = (profile?.heroChips?.filter(Boolean) || ["Flutter", "Node.js", "TypeScript", "Agentic AI"]).slice(
     0,
     4
@@ -93,7 +110,7 @@ export default function HeroSection({ profile }: HeroProps) {
   const thesis = fullBio.split(/(?<=\.)\s/)[0];
 
   return (
-    <section className="relative min-h-[90svh] sm:h-[100svh] sm:min-h-[600px] w-full flex flex-col justify-between px-6 py-6 sm:px-12 sm:py-8 bg-white overflow-hidden">
+    <section className="relative min-h-[90svh] sm:h-[100svh] sm:min-h-[600px] w-full flex flex-col justify-between px-6 py-6 sm:px-12 sm:py-8 bg-white overflow-hidden hero-section-wrap">
       <div className="hero-grid" aria-hidden />
 
       <div className="pt-12 sm:pt-16 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-slate-400">
@@ -140,21 +157,118 @@ export default function HeroSection({ profile }: HeroProps) {
 
         <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
           {profileImgUrl && (
-            <button
-              type="button"
-              data-cursor="About"
-              onClick={() => window.dispatchEvent(new Event("portfolio:open-about"))}
-              className="relative h-14 w-14 sm:h-16 sm:w-16 rounded-full overflow-hidden border-2 border-slate-200 shrink-0 shadow-md animate-float-slow hover:rotate-[-8deg] hover:scale-110 transition-transform duration-300"
-              aria-label="Open about"
-            >
-              <Image
-                src={profileImgUrl}
-                alt={profile?.name || "Siss Hmue Aung"}
-                fill
-                priority
-                className="object-cover"
-              />
-            </button>
+            <div className="flex items-center gap-3.5 sm:gap-4 shrink-0">
+              {/* Avatar 3D Coin with exact dimensions so refresh button stays snug on mobile */}
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 shrink-0 [perspective:1000px]">
+                <button
+                  type="button"
+                  data-cursor="Flip"
+                  onClick={handleAvatarClick}
+                  className="w-full h-full rounded-full cursor-pointer focus:outline-none transition-transform duration-300 hover:scale-105 active:scale-95 group"
+                  aria-label={isFlipped ? "Flip to primary profile picture" : "Flip to alternate profile picture and warm theme"}
+                >
+                  {/* 3D Flipping Coin Body with subtle lively pulse ring */}
+                  <div
+                    className="w-full h-full rounded-full relative transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-md group-hover:shadow-xl ring-2 ring-[#0055ff]/30 hover:ring-[#0055ff] transition-all"
+                    style={{
+                      transformStyle: "preserve-3d",
+                      transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+                    }}
+                  >
+                    {/* Front Face: Primary Profile Pic (Warm #feb55c / Orange Tone) */}
+                    <div
+                      className="absolute inset-0 w-full h-full rounded-full overflow-hidden border-2 border-slate-200 bg-white"
+                      style={{
+                        backfaceVisibility: "hidden",
+                        WebkitBackfaceVisibility: "hidden",
+                      }}
+                    >
+                      <Image
+                        src={profileImgUrl}
+                        alt={profile?.profileImage?.alt || profile?.name || "Primary Profile Picture"}
+                        fill
+                        priority
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 rounded-full ring-1 ring-inset ring-[#feb55c]/60 pointer-events-none" />
+                    </div>
+
+                    {/* Back Face: Secondary Profile Pic (Alternate View) */}
+                    <div
+                      className="absolute inset-0 w-full h-full rounded-full overflow-hidden border-2 border-[#0a0a0c] bg-white"
+                      style={{
+                        backfaceVisibility: "hidden",
+                        WebkitBackfaceVisibility: "hidden",
+                        transform: "rotateY(180deg)",
+                      }}
+                    >
+                      <Image
+                        src={secondaryImgUrl || profileImgUrl}
+                        alt={profile?.secondaryProfileImage?.alt || "Alternate Profile Picture"}
+                        fill
+                        priority
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 rounded-full ring-2 ring-inset ring-[#0055ff]/40 pointer-events-none" />
+                    </div>
+                  </div>
+                </button>
+
+                {/* Refresh arrow icon pinned SNUGLY to bottom-right curve of avatar */}
+                <button
+                  type="button"
+                  onClick={handleAvatarClick}
+                  data-cursor="Flip"
+                  title="Tap to flip & toggle theme"
+                  className="absolute -bottom-1 -right-1 z-10 h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-[#0a0a0c] text-white text-[10px] sm:text-xs font-mono font-bold flex items-center justify-center shadow-md border-2 border-white transition-transform hover:scale-110 active:scale-90 cursor-pointer"
+                >
+                  <span className={`inline-block transition-transform duration-500 ${isFlipped ? "rotate-180 text-[#feb55c]" : "text-white"}`}>
+                    ↻
+                  </span>
+                </button>
+              </div>
+
+              {/* Playful Curly Arrow & "Click me!" Badge */}
+              <button
+                type="button"
+                onClick={handleAvatarClick}
+                data-cursor="Flip"
+                title="Tap to flip profile & theme"
+                className="group/callout flex items-center gap-1.5 py-1 px-1 cursor-pointer select-none text-left focus:outline-none animate-bounce-subtle"
+              >
+                {/* Hand-drawn Curly Arrow pointing LEFT towards the avatar */}
+                <svg
+                  width="34"
+                  height="24"
+                  viewBox="0 0 34 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="shrink-0 text-[#0055ff] group-hover/callout:translate-x-[-2px] transition-transform duration-200"
+                >
+                  {/* Expressive hand-drawn curly swirl pointing left */}
+                  <path
+                    d="M32 17C27 21 19 22 14 18C9 14 9 7 15 5C20 3 23 9 18 12C12 15 6 11 3 9"
+                    stroke="currentColor"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {/* Arrowhead pointing towards the avatar (left) */}
+                  <path
+                    d="M8 5L2 9L6 15"
+                    stroke="currentColor"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+
+                {/* Playful Pill Badge */}
+                <span className="font-heading font-extrabold text-[11px] sm:text-xs tracking-wider uppercase bg-[#0a0a0c] text-[#feb55c] px-3 py-1 rounded-full shadow-sm border border-[#feb55c]/50 group-hover/callout:bg-[#0055ff] group-hover/callout:text-white transition-colors duration-200 whitespace-nowrap rotate-[-2deg]">
+                  {isFlipped ? "Flip back! ↺" : "Click me! ✦"}
+                </span>
+              </button>
+            </div>
           )}
 
           <div className="space-y-1.5 sm:space-y-2">
